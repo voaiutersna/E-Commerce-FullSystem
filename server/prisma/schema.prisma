@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement()) //ใช้เพิ่ม id อัตโนมัติ
+  email String @unique
+  password String? //password อาจจะมีหรือไม่มี
+  name String?
+  picture String?
+  role String @default("user") //ค่าเริ่มต้นของ role คือ user
+  enabled Boolean @default(true) //ไว้บอกว่า user นี้ยังใช้งานได้อยู่หรือไม่ เปิดปิดการใช้งานบัญชี
+  address String?
+  orders Order[] //1 user สั่งซื้อได้หลาย order 1:n
+  carts Cart[] //1 user มีได้หลาย cart 1:n
+  createdAt DateTime @default(now()) //เก็บวันที่สร้างบัญชี
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  titile String
+  description String
+  price Float
+  sold Int @default(0)
+  quantity Int
+  category Category? @relation(fields: [categoryId],references: [id],onDelete: Cascade) //1 product มีได้ 1 category n:1
+  categoryId Int?
+  orderItems ProductsOnOrder[] //1 product มีได้หลาย order 1:n
+  cartItems ProductOnCart[] //1 product มีได้หลาย cart 1:n
+  images Image[] //1 product มีได้หลาย image 1:n
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+model Order {
+  id Int @id @default(autoincrement())
+  product ProductsOnOrder[] //1 order มีได้หลาย product 1:n
+  cartTotal Float
+  orderStatus String @default("Not Processed")
+  orderby User? @relation(fields:[orderbyid], references: [id],onDelete: Cascade)
+  orderbyid Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductsOnOrder {
+  id Int @id @default(autoincrement())
+  products Product? @relation(fields: [productId], references: [id],onDelete: Cascade)
+  productId Int
+  order Order? @relation(fields: [orderId], references: [id],onDelete: Cascade)
+  orderId Int
+  quantity Int
+  price Float
+}
+
+model Category{
+  id Int @id @default(autoincrement())
+  name String
+  products Product[] //1 category มีได้หลาย product 1:n
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+model Cart{
+  id Int @id @default(autoincrement())
+  products ProductOnCart[] //1 cart มีได้หลาย product 1:n
+  cartTotal Float
+  orderby User? @relation(fields:[orderbyid], references: [id]) 
+  orderbyid Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductOnCart {
+  Id Int @id @default(autoincrement())
+  Cart Cart @relation(fields: [cartId], references: [id],onDelete: Cascade)
+  cartId Int
+  Product Product @relation(fields: [productId], references: [id])
+  productId Int
+  quantity Int
+  price Float
+}
+
+model Image{
+  id Int @id @default(autoincrement())
+  asset_id String //เก็บ id ของรูปภาพ
+  public_id String //เก็บ public id ของรูปภาพ
+  url String
+  secure_url String
+  product Product @relation(fields: [productId], references: [id],onDelete: Cascade)
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
