@@ -1,5 +1,9 @@
+import LayoutGuest from "./components/LayoutGuest"
 export default function HomePage(){
   return(
-    <div>HomePage</div>
+    <>
+      <LayoutGuest/>
+      <div>HomePage</div>
+    </>
   )
 }

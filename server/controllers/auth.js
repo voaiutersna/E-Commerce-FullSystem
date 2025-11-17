@@ -80,7 +80,7 @@ exports.login = async (req,res)=>{
             if(err){
                 return res.status(500).json({message:"server error"})
             }
-            res.json({payload, token}) //ส่ง payload กับ token กลับไปให้ client
+            res.json({payload, token,message:"Login succesfully"}) //ส่ง payload กับ token กลับไปให้ client
         })
     }catch(error){
         console.log(error)
